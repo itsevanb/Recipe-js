@@ -35,10 +35,6 @@ Recipe Keeper is a web-based application that allows users to conveniently store
 - Add the ability to categorize recipes.
 - Introduce a search functionality to quickly find recipes.
 
-## Credits
-
-Inspired by design ideas from Mike Kus and Shane Mielke.
-
 ---
 
 Made with :heart: by Evan 
