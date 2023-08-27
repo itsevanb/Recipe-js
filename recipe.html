@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="recipe.css">
+    <title>Recipe Keeper</title>
+</head>
+<body>
+
+    <!-- Form for adding new recipes -->
+    <h1>Recipe Keeper</h1>
+    <h2>Add Recipe</h2>
+    <form id="recipe-form">
+        <!-- Recipe Name -->
+        <label for="recipe-name">Recipe Name:</label>
+        <input type="text" id="recipe-name" name="recipe-name" placeholder="Enter recipe name">
+
+        <!-- Image URL -->
+        <label for="image-url">Image URL:</label>
+        <input type="text" id="image-url" name="image-url" placeholder="Enter image URL">
+
+        <!-- Ingredients -->
+        <label for="ingredients">Ingredients:</label>
+        <textarea id="ingredients" name="ingredients" rows="4" cols="50" placeholder="Enter ingredients, separated by commas"></textarea>
+        
+        <!-- Steps for Preparation -->
+        <label for="steps">Steps for Preparation:</label>
+        <textarea id="steps" name="steps" rows="4" cols="50" placeholder="Enter steps for preparation"></textarea>
+        
+        <!-- Submit Button -->
+        <input type="submit" value="Add Recipe">
+    </form>
+
+    <!-- Area to display added recipes -->
+    <h2>Your Recipes</h2>
+    <div id="recipe-list">
+        <!-- Added recipes will appear here -->
+    </div>
+
+    <script src="recipe.js"></script>
+
+</body>
+</html>
