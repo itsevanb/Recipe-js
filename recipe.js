@@ -12,89 +12,109 @@ let recipes = [];
 // Variable to keep track of the recipe being edited
 let recipeBeingEdited = null;
 
-// Load recipes from local storage
-if (localStorage.getItem('recipes')) {
-    recipes = JSON.parse(localStorage.getItem('recipes'));
+// Function to fetch recipes from the API
+async function fetchRecipes() {
+  try {
+    const response = await fetch('http://localhost:8000/recipes');
+    recipes = await response.json();
     displayRecipes();
-}
-
-// Function to save recipes to local storage
-function saveRecipesToLocalStorage() {
-    localStorage.setItem('recipes', JSON.stringify(recipes));
+  } catch (error) {
+    console.error('Error fetching recipes:', error);
+  }
 }
 
 // Function to display recipes
 function displayRecipes() {
-    // Clear any existing recipes in the DOM
-    recipeList.innerHTML = '';
+  // Clear any existing recipes in the DOM
+  recipeList.innerHTML = '';
   
-    // Loop through the recipes array and display each one
-    recipes.forEach((recipe, index) => {
-        const recipeDiv = document.createElement('div');
-        recipeDiv.innerHTML = `
-            <h3>${recipe.name}</h3>
-            <img src="${recipe.imageUrl}" alt="${recipe.name}" class="recipe-image">
-            <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
-            <p><strong>Steps:</strong> ${recipe.steps}</p>
-        `;
-      
-        // Delete button
-        const deleteButton = document.createElement('button');
-        deleteButton.innerHTML = 'Delete';
-        deleteButton.addEventListener('click', function() {
-            recipes.splice(index, 1);
-            saveRecipesToLocalStorage();
-            displayRecipes();
-        });
+  // Loop through the recipes array and display each one
+  recipes.forEach((recipe, index) => {
+    const recipeDiv = document.createElement('div');
+    recipeDiv.innerHTML = `
+      <h3>${recipe.name}</h3>
+      <img src="${recipe.imageURL}" alt="${recipe.name}" class="recipe-image">
+      <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+      <p><strong>Steps:</strong> ${recipe.steps}</p>
+    `;
 
-        // Edit button
-        const editButton = document.createElement('button');
-        editButton.innerHTML = 'Edit';
-        editButton.addEventListener('click', function() {
-            recipeBeingEdited = index;
-            recipeNameInput.value = recipe.name;
-            ingredientsInput.value = recipe.ingredients;
-            stepsInput.value = recipe.steps;
-            imageUrlInput.value = recipe.imageUrl;
+    // Delete button
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = 'Delete';
+    deleteButton.addEventListener('click', async function() {
+      try {
+        const response = await fetch(`http://localhost:8000/recipes/${recipe.id}`, {
+          method: 'DELETE'
         });
-
-        recipeDiv.appendChild(deleteButton);
-        recipeDiv.appendChild(editButton);
-        recipeList.appendChild(recipeDiv);
+        if (response.status === 200) {
+          fetchRecipes(); // Refresh the recipes
+        }
+      } catch (error) {
+        console.error('Error deleting recipe:', error);
+      }
     });
+
+    // Edit button
+    const editButton = document.createElement('button');
+    editButton.innerHTML = 'Edit';
+    editButton.addEventListener('click', function() {
+      recipeBeingEdited = recipe.id;
+      recipeNameInput.value = recipe.name;
+      ingredientsInput.value = recipe.ingredients;
+      stepsInput.value = recipe.steps;
+      imageUrlInput.value = recipe.imageURL;
+    });
+
+    recipeDiv.appendChild(deleteButton);
+    recipeDiv.appendChild(editButton);
+    recipeList.appendChild(recipeDiv);
+  });
 }
 
 // Event listener for form submission
-recipeForm.addEventListener('submit', function(event) {
-    // Prevent default form submission behavior
-    event.preventDefault();
+recipeForm.addEventListener('submit', async function(event) {
+  event.preventDefault();
 
-    // Capture input variables
-    const recipeName = recipeNameInput.value;
-    const ingredients = ingredientsInput.value;
-    const steps = stepsInput.value;
-    const imageUrl = imageUrlInput.value;
+  // Capture input variables
+  const recipeName = recipeNameInput.value;
+  const ingredients = ingredientsInput.value;
+  const steps = stepsInput.value;
+  const imageUrl = imageUrlInput.value;
 
-    // Create a new recipe object
-    const newRecipe = {
-        name: recipeName,
-        ingredients: ingredients,
-        steps: steps,
-        imageUrl: imageUrl
-    };
+  // Create a new recipe object
+  const newRecipe = {
+    name: recipeName,
+    ingredients: ingredientsInput.value.split(','),
+    steps: steps,
+    imageURL: imageUrl
+  };
 
-    // Check if a recipe is being edited
+  try {
+    let url = 'http://localhost:8000/recipes';
+    let method = 'POST';
+
     if (recipeBeingEdited !== null) {
-        recipes[recipeBeingEdited] = newRecipe;
-        recipeBeingEdited = null;
-    } else {
-        recipes.push(newRecipe);
+      url = `http://localhost:8000/recipes/${recipeBeingEdited}`;
+      method = 'PUT';
     }
 
-    // Save recipes to local storage and update the DOM
-    saveRecipesToLocalStorage();
-    displayRecipes();
+    const response = await fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newRecipe)
+    });
 
-    // Clear the input fields
-    recipeForm.reset();
+    if (response.status === 200) {
+      recipeForm.reset();
+      recipeBeingEdited = null;
+      fetchRecipes(); // Refresh the recipes
+    }
+  } catch (error) {
+    console.error('Error saving recipe:', error);
+  }
 });
+
+// Fetch recipes on page load
+fetchRecipes();
